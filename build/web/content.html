@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo Form</title>
+    <link rel = "stylesheet" href="content.css">
+</head>
+
+<body>
+    <div style="text-align: right;margin: 20px;"><form action="LogoutServlet" method="POST"><button>Logout</button></form></div>
+  <h1>To-Do List Application</h1>
+    <form id="todo-form" action="NewTask" method="POST">
+      <input type="text" id="todo-input" name="task" placeholder="Add new task..." />
+      <button >Add</button>
+    </form>
+  <div class="todo-list">
+    <h2>Pending Tasks</h2>
+    <div id="pending-tasks" class="flex-container"></div>
+    <h2>Completed Tasks</h2>
+    <div id="completed-tasks" class="flex-container"></div>
+  </div>
+</body>
+
+  <script>
+    const todoForm = document.getElementById('todo-form');
+    const todoInput = document.getElementById('todo-input');
+    const pendingTasksList = document.getElementById('pending-tasks');
+    const completedTasksList = document.getElementById('completed-tasks');
+
+        let tasks = [];
+        function completeTask(index) {
+      tasks[index].completed = true;
+      renderTasks();
+    }
+
+    function removeCompletedTask(index) {
+      tasks.splice(index, 1);
+      renderTasks();
+    }
+    function addTask(event) {
+      event.preventDefault();
+      const task = todoInput.value;
+      if (task !== '') {
+        tasks.push({ text: task, completed: false });
+        todoInput.value = '';
+        renderTasks();
+      }
+    }
+
+    function renderTasks() {
+      pendingTasksList.innerHTML = '';
+      completedTasksList.innerHTML = '';
+
+      if (tasks.filter(task => !task.completed).length === 0) {
+        pendingTasksList.innerHTML = '<p>No pending tasks.</p>';
+
+      }
+
+      if (tasks.filter(task => task.completed).length === 0) {
+        completedTasksList.innerHTML = '<p>No completed tasks.</p>';
+      }
+tasks.forEach((task, index) => {
+  const div = document.createElement('div');
+  div.classList.add('flex-item');
+  div.innerHTML = '';
+  div.innerHTML += "<h2>" + task.text + "</h2>";
+  if (!task.completed) {
+    div.innerHTML += `<br><form action="CompleteTaskServlet" method="POST"><input type="hidden" name="task" value="${task.text}"><button type="submit">Complete</button></form>`;
+    pendingTasksList.appendChild(div);
+  } else {
+    div.innerHTML += `<br><form action="RemoveTaskServlet" method="POST"><input type="hidden" name="task" value="${task.text}"><button type="submit">Delete</button></form>`;
+    completedTasksList.appendChild(div);
+  }
+});
+    }
+
+
+    
+    fetch("FetchTasks")
+            .then(response=>response.json())
+            .then(data=>{tasks=data; renderTasks();})
+            .catch(error=> console.log(error));
+//    todoForm.addEventListener('submit', addTask);
+    renderTasks();
+      
+  </script>
+</html>

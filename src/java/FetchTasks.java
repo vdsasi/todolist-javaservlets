@@ -3,7 +3,10 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class FetchTasks extends HttpServlet {
@@ -18,14 +21,13 @@ PrintWriter out = response.getWriter();
             String username = (String) session.getAttribute("username");
              Connection con=DriverManager.getConnection("jdbc:mysql://localhost/todolist?characterEncoding=utf8","root","");  
 
-            String query = "SELECT * FROM incompletedtasks where name = " + username;
+            String query = "SELECT * FROM incompletedtasks where name = '" + username +"'";
             PreparedStatement statement = con.prepareStatement(query);
             ResultSet resultSet = statement.executeQuery();
             List<JSONObject> tasks = new ArrayList<>();
 
             while (resultSet.next()) {
                 JSONObject task = new JSONObject();
-                    task.put("id", resultSet.getInt("id"));
                     task.put("text", resultSet.getString("task"));
                     task.put("completed", false);
                     tasks.add(task);
@@ -33,14 +35,13 @@ PrintWriter out = response.getWriter();
             }
 
 
-            query = "SELECT * FROM completedtasks where name=" + username;
+            query = "SELECT * FROM completedtasks where name= '" + username + "'";
             statement = con.prepareStatement(query);
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 JSONObject task = new JSONObject();
                 
-                task.put("id", resultSet.getInt("id"));
                 task.put("text", resultSet.getString("task"));
                 task.put("completed", true);
                 tasks.add(task);
@@ -55,7 +56,17 @@ PrintWriter out = response.getWriter();
             statement.close();
             con.close();
         } catch (Exception e) {
-out.println("ERRor");
+                response.setContentType("application/json");
+                List<JSONObject> errors = new ArrayList<>();
+                JSONObject error = new JSONObject();
+    try {
+        error.put("message", e);
+    } catch (JSONException ex) {
+        Logger.getLogger(FetchTasks.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    errors.add(error);JSONArray jsonArray = new JSONArray(errors);response.getWriter().write(jsonArray.toString());
+    
+                
         }
     }
 }

@@ -48,7 +48,7 @@ public class NewTask extends HttpServlet {
         statement.setString(2, task);
         statement.executeUpdate();
         
-        out.println("Task added successfully!");
+        
 response.sendRedirect("content.html");
     } catch (Exception e) {
         out.println("Error adding task: " + e.getMessage());

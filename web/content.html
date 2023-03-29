@@ -13,8 +13,9 @@
   <h1>To-Do List Application</h1>
     <form id="todo-form" action="NewTask" method="POST">
       <input type="text" id="todo-input" name="task" placeholder="Add new task..." />
-      <button >Add</button>
+      <button type="submit" >Add</button>
     </form>
+<!--  <form action="FetchTasks" method="post"><button type="submit">click</button></form>-->
   <div class="todo-list">
     <h2>Pending Tasks</h2>
     <div id="pending-tasks" class="flex-container"></div>
@@ -39,15 +40,7 @@
       tasks.splice(index, 1);
       renderTasks();
     }
-    function addTask(event) {
-      event.preventDefault();
-      const task = todoInput.value;
-      if (task !== '') {
-        tasks.push({ text: task, completed: false });
-        todoInput.value = '';
-        renderTasks();
-      }
-    }
+    
 
     function renderTasks() {
       pendingTasksList.innerHTML = '';
@@ -76,8 +69,6 @@ tasks.forEach((task, index) => {
 });
     }
 
-
-    
     fetch("FetchTasks")
             .then(response=>response.json())
             .then(data=>{tasks=data; renderTasks();})
